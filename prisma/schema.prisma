@@ -1,0 +1,72 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum StudentLevel {
+  undergrad
+  masters
+}
+
+model User {
+  id String @id @default(cuid())
+  name String
+  email String @unique
+  passwordHash String
+  avatarUrl String?
+  roleId String?
+  extraPermsMask BigInt @default(0)
+  isActive Boolean @default(true)
+  permVersion Int @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student   Student?
+  professor Professor?
+  admin     Admin?
+
+  role Role? @relation(fields: [roleId], references: [id])
+}
+
+model Student {
+  userId        String  @id
+  studentNumber String  @unique
+  level         StudentLevel
+  major         String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Professor {
+  userId         String @id
+  title          String
+  departmentCode String
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([departmentCode])
+}
+
+model Admin {
+  userId String @id
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Role {
+  id String @id @default(cuid())
+  name String @unique
+  permsMask BigInt @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  users User[]
+}
