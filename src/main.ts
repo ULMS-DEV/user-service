@@ -11,7 +11,6 @@ async function bootstrap() {
       url: '0.0.0.0:50052'
     }
   })
-  // app.useGlobalPipes(new ValidationPipe());
   await app.listen();
 }
 bootstrap();
